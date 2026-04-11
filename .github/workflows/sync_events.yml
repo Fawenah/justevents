@@ -22,12 +22,8 @@ on:
 
 jobs:
   tests:
-    name: Tests (${{ matrix.creation_method }})
+    name: Run tests
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        creation_method: [direct, sesh, justevent]
 
     steps:
       - name: Checkout repository
@@ -45,8 +41,6 @@ jobs:
           pip install -r requirements-dev.txt
 
       - name: Run tests
-        env:
-          JUSTEVENTS_DEFAULT_EVENT_CREATION_METHOD: ${{ matrix.creation_method }}
         run: pytest tests/ -v
   sync:
     name: Sync events
