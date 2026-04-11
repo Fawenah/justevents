@@ -236,9 +236,9 @@ The workflow at [.github/workflows/sync_events.yml](.github/workflows/sync_event
 You can also trigger it manually from the **Actions** tab, with:
 
 - `dry_run` toggle
-- `event_creation_method` override (`direct`, `sesh`, `justevent`)
+- `event_creation_method` override (`direct`, `sesh`, `justevent`) — **this overrides all source configs for that run**
 
-The workflow now runs tests in a matrix across all three methods before the sync job.
+When you select a creation method in the manual workflow trigger, it will be used for all event sources, overriding any `event_creation_method` values in your `config.yaml`. This is useful for testing different modes or temporarily switching strategies without editing the config file.
 
 ### Option B — Raspberry Pi or Linux server (cron)
 

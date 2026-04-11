@@ -52,12 +52,15 @@ def load_config(config_path: str = "config/config.yaml") -> Dict[str, Any]:
         discord_cfg["guild_id"] = env_guild
 
     # Global default for how events should be created in Discord.
+    # Environment variable takes precedence (e.g., workflow input override).
     env_default_creation = os.environ.get("JUSTEVENTS_DEFAULT_EVENT_CREATION_METHOD", "").strip()
+    env_override = False
     if env_default_creation:
         default_creation_method = _normalise_creation_method(
             env_default_creation,
             where="env JUSTEVENTS_DEFAULT_EVENT_CREATION_METHOD",
         )
+        env_override = True
     else:
         default_creation_method = _normalise_creation_method(
             config.get("sync", {}).get("default_event_creation_method", "direct"),
@@ -76,10 +79,14 @@ def load_config(config_path: str = "config/config.yaml") -> Dict[str, Any]:
     global_lookahead = config.get("sync", {}).get("lookahead_days", 90)
     for source in config.get("sources", []):
         source.setdefault("lookahead_days", global_lookahead)
-        source["event_creation_method"] = _normalise_creation_method(
-            source.get("event_creation_method", default_creation_method),
-            where=f"sources[{source.get('name', source.get('type', '?'))}].event_creation_method",
-        )
+        # If env var is set, it overrides source config. Otherwise use source config or fall back to default.
+        if env_override:
+            source["event_creation_method"] = default_creation_method
+        else:
+            source["event_creation_method"] = _normalise_creation_method(
+                source.get("event_creation_method", default_creation_method),
+                where=f"sources[{source.get('name', source.get('type', '?'))}].event_creation_method",
+            )
         if default_command_channel_id:
             source.setdefault("command_channel_id", default_command_channel_id)
 
